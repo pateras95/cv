@@ -46,7 +46,7 @@
             <input ref="fileInput" type="file" hidden @change="onFileChange" />
           </v-col>
           <v-col cols="12" md="4">
-            <v-card variant="outlined" rounded="lg" class="pa-4 text-center">
+            <v-card variant="outlined" rounded="lg" class="pa-4 text-center sticky-preview">
               <div class="text-caption text-medium-emphasis mb-2">Preview</div>
               <v-avatar size="80" class="mb-2"><v-img :src="content.about.avatar" /></v-avatar>
               <div class="text-body-1 font-weight-bold">{{ content.about.name }}</div>
@@ -76,24 +76,20 @@
 
       <!-- SKILLS -->
       <div v-show="tab === 'Skills'">
-        <div class="d-flex align-center justify-center ga-3 mb-4">
+        <div class="text-center mb-4">
           <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.skills.push({name:'',icon:'mdi-code-tags',color:'#7dd3fc',category:'Other'})"><v-icon start>mdi-plus</v-icon> Add Skill</v-btn>
         </div>
-        <p class="text-caption text-medium-emphasis mb-4 text-center">Drag to reorder · Click the icon button to pick an icon</p>
+        <p class="text-caption text-medium-emphasis mb-4 text-center">Drag to reorder · Click icon to change</p>
         <draggable v-model="content.skills" item-key="name" handle=".drag-handle">
           <template #item="{ element, index }">
             <v-card variant="outlined" rounded="lg" class="pa-3 mb-2">
               <v-row dense align="center">
                 <v-col cols="auto"><v-icon class="drag-handle" style="cursor:grab;">mdi-drag</v-icon></v-col>
                 <v-col cols="auto">
-                  <v-btn variant="tonal" :color="element.color" size="small" rounded="lg" @click="openIconPicker(index)" class="text-none">
-                    <v-icon>{{ element.icon }}</v-icon>
-                  </v-btn>
+                  <v-btn variant="tonal" :color="element.color" size="small" rounded="lg" @click="openIconPicker(index)"><v-icon>{{ element.icon }}</v-icon></v-btn>
                 </v-col>
                 <v-col><v-text-field v-model="element.name" label="Name" variant="outlined" density="compact" hide-details /></v-col>
-                <v-col cols="auto">
-                  <input type="color" v-model="element.color" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;background:transparent;" />
-                </v-col>
+                <v-col cols="auto"><input type="color" v-model="element.color" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;background:transparent;" /></v-col>
                 <v-col cols="3" sm="2"><v-text-field v-model="element.category" label="Category" variant="outlined" density="compact" hide-details /></v-col>
                 <v-col cols="auto"><v-btn icon="mdi-close" variant="text" size="x-small" color="error" @click="content.skills.splice(index,1)" /></v-col>
               </v-row>
@@ -105,23 +101,29 @@
       <!-- BOOKS -->
       <div v-show="tab === 'Books'">
         <div class="text-center mb-4">
-          <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.books.push({title:'',author:'',cover:'',notes:''})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
+          <v-btn color="primary" variant="tonal" size="small" class="text-none mr-2" @click="content.books.push({title:'',author:'',cover:'',notes:''})"><v-icon start>mdi-plus</v-icon> Add Manually</v-btn>
+          <v-btn color="secondary" variant="tonal" size="small" class="text-none" @click="bookSearchDialog = true"><v-icon start>mdi-magnify</v-icon> Search Book</v-btn>
         </div>
-        <v-row justify="center">
-          <v-col v-for="(b, i) in content.books" :key="'b'+i" cols="12" sm="6" md="4">
-            <v-card variant="outlined" rounded="lg" class="pa-4">
-              <div class="d-flex align-start mb-3">
-                <v-img v-if="b.cover" :src="b.cover" width="45" height="65" cover rounded class="mr-3 flex-shrink-0" />
-                <div class="flex-grow-1"><div class="text-body-2 font-weight-bold">{{ b.title || 'New' }}</div><div class="text-caption text-medium-emphasis">{{ b.author }}</div></div>
-                <v-btn icon="mdi-close" variant="text" size="x-small" color="error" @click="content.books.splice(i,1)" />
+        <p class="text-caption text-medium-emphasis mb-4 text-center">Drag to reorder</p>
+        <draggable v-model="content.books" item-key="title" handle=".drag-handle">
+          <template #item="{ element, index }">
+            <v-card variant="outlined" rounded="lg" class="pa-4 mb-3">
+              <div class="d-flex align-start ga-3">
+                <v-icon class="drag-handle mt-1" style="cursor:grab;">mdi-drag</v-icon>
+                <v-img v-if="element.cover" :src="element.cover" width="50" height="70" cover rounded class="flex-shrink-0" />
+                <div class="flex-grow-1">
+                  <v-row dense>
+                    <v-col cols="12" sm="6"><v-text-field v-model="element.title" label="Title" variant="outlined" density="compact" hide-details /></v-col>
+                    <v-col cols="12" sm="6"><v-text-field v-model="element.author" label="Author" variant="outlined" density="compact" hide-details /></v-col>
+                    <v-col cols="12"><v-text-field v-model="element.cover" label="Cover URL" variant="outlined" density="compact" hide-details /></v-col>
+                    <v-col cols="12"><v-text-field v-model="element.notes" label="Notes (shown on portfolio)" variant="outlined" density="compact" hide-details /></v-col>
+                  </v-row>
+                </div>
+                <v-btn icon="mdi-close" variant="text" size="x-small" color="error" class="mt-1" @click="content.books.splice(index,1)" />
               </div>
-              <v-text-field v-model="content.books[i].title" label="Title" variant="outlined" density="compact" hide-details class="mb-2" />
-              <v-text-field v-model="content.books[i].author" label="Author" variant="outlined" density="compact" hide-details class="mb-2" />
-              <v-text-field v-model="content.books[i].cover" label="Cover URL" variant="outlined" density="compact" hide-details class="mb-2" />
-              <v-text-field v-model="content.books[i].notes" label="Notes" variant="outlined" density="compact" hide-details />
             </v-card>
-          </v-col>
-        </v-row>
+          </template>
+        </draggable>
       </div>
 
       <!-- CERTS -->
@@ -154,28 +156,33 @@
         <div class="text-center mb-4">
           <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.projects.push({title:'',description:'',image:'',tags:[],link:'',github:'',category:'Personal'})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
         </div>
-        <v-row justify="center">
-          <v-col v-for="(p, i) in content.projects" :key="'p'+i" cols="12" sm="6" md="4">
-            <v-card variant="outlined" rounded="lg" class="pa-4">
-              <div class="d-flex align-center mb-3">
-                <v-chip :color="p.category==='Work'?'primary':'secondary'" size="x-small" variant="flat" class="mr-2">{{ p.category }}</v-chip>
-                <span class="text-body-2 font-weight-bold text-truncate">{{ p.title || 'New' }}</span>
-                <v-spacer />
-                <v-btn icon="mdi-close" variant="text" size="x-small" color="error" @click="content.projects.splice(i,1)" />
+        <p class="text-caption text-medium-emphasis mb-4 text-center">Drag to reorder</p>
+        <draggable v-model="content.projects" item-key="title" handle=".drag-handle">
+          <template #item="{ element, index }">
+            <v-card variant="outlined" rounded="lg" class="pa-4 mb-3">
+              <div class="d-flex align-start ga-3">
+                <v-icon class="drag-handle mt-1" style="cursor:grab;">mdi-drag</v-icon>
+                <div class="flex-grow-1">
+                  <div class="d-flex align-center mb-3">
+                    <v-chip :color="element.category==='Work'?'primary':'secondary'" size="x-small" variant="flat" class="mr-2">{{ element.category || 'Personal' }}</v-chip>
+                    <span class="text-body-2 font-weight-bold">{{ element.title || 'New Project' }}</span>
+                    <v-spacer />
+                    <v-btn icon="mdi-close" variant="text" size="x-small" color="error" @click="content.projects.splice(index,1)" />
+                  </div>
+                  <v-row dense>
+                    <v-col cols="12" sm="6"><v-text-field v-model="element.title" label="Title" variant="outlined" density="compact" hide-details /></v-col>
+                    <v-col cols="12" sm="6"><v-text-field v-model="element.category" label="Category (Work/Personal)" variant="outlined" density="compact" hide-details /></v-col>
+                    <v-col cols="12"><v-textarea v-model="element.description" label="Description" variant="outlined" density="compact" rows="2" hide-details /></v-col>
+                    <v-col cols="12"><v-text-field v-model="element.image" label="Screenshot URL" variant="outlined" density="compact" hide-details /></v-col>
+                    <v-col cols="6"><v-text-field v-model="element.link" label="Live URL" variant="outlined" density="compact" hide-details /></v-col>
+                    <v-col cols="6"><v-text-field v-model="element.github" label="GitHub URL" variant="outlined" density="compact" hide-details /></v-col>
+                    <v-col cols="12"><v-combobox v-model="element.tags" label="Tags" variant="outlined" density="compact" hide-details multiple chips closable-chips /></v-col>
+                  </v-row>
+                </div>
               </div>
-              <v-img v-if="p.image" :src="p.image" height="70" cover rounded class="mb-3" />
-              <v-text-field v-model="p.title" label="Title" variant="outlined" density="compact" hide-details class="mb-2" />
-              <v-textarea v-model="p.description" label="Description" variant="outlined" density="compact" rows="2" hide-details class="mb-2" />
-              <v-text-field v-model="p.image" label="Image URL" variant="outlined" density="compact" hide-details class="mb-2" />
-              <v-row dense>
-                <v-col cols="6"><v-text-field v-model="p.link" label="Live URL" variant="outlined" density="compact" hide-details /></v-col>
-                <v-col cols="6"><v-text-field v-model="p.github" label="GitHub" variant="outlined" density="compact" hide-details /></v-col>
-              </v-row>
-              <v-text-field v-model="p.category" label="Category (Work/Personal)" variant="outlined" density="compact" hide-details class="mt-2" />
-              <v-combobox v-model="p.tags" label="Tags" variant="outlined" density="compact" hide-details multiple chips closable-chips class="mt-2" />
             </v-card>
-          </v-col>
-        </v-row>
+          </template>
+        </draggable>
       </div>
 
       <!-- CONTACT -->
@@ -226,7 +233,42 @@
               <v-icon size="22">{{ ic }}</v-icon>
             </v-btn>
           </div>
-          <div v-if="filteredIcons.length === 0" class="text-center text-medium-emphasis py-8">No icons match "{{ iconSearch }}"</div>
+          <div v-if="filteredIcons.length === 0" class="text-center text-medium-emphasis py-8">No icons found</div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <!-- Book Search Dialog -->
+    <v-dialog v-model="bookSearchDialog" max-width="600" scrollable>
+      <v-card rounded="xl">
+        <v-card-title class="d-flex align-center pa-4">
+          <span class="text-body-1 font-weight-bold">Search & Add Book</span>
+          <v-spacer />
+          <v-btn icon="mdi-close" variant="text" size="small" @click="bookSearchDialog = false" />
+        </v-card-title>
+        <div class="px-4 pb-2">
+          <v-text-field v-model="bookQuery" label="Search by title or author..." variant="outlined" density="compact" hide-details prepend-inner-icon="mdi-magnify" :loading="bookSearching" @keyup.enter="searchBooks" clearable>
+            <template #append-inner>
+              <v-btn variant="text" size="x-small" color="primary" class="text-none" @click="searchBooks" :disabled="!bookQuery">Search</v-btn>
+            </template>
+          </v-text-field>
+        </div>
+        <v-card-text style="max-height: 420px;" class="pa-4">
+          <div v-if="bookSearching" class="text-center py-8"><v-progress-circular indeterminate color="primary" /></div>
+          <div v-else-if="bookResults.length === 0 && bookSearched" class="text-center text-medium-emphasis py-8">No books found. Try a different search.</div>
+          <div v-else>
+            <v-card v-for="(br, bi) in bookResults" :key="bi" variant="outlined" rounded="lg" class="pa-3 mb-2 book-result" @click="addBookFromSearch(br)">
+              <div class="d-flex align-start ga-3">
+                <v-img v-if="br.cover" :src="br.cover" width="40" height="58" cover rounded class="flex-shrink-0" />
+                <div class="flex-grow-1">
+                  <div class="text-body-2 font-weight-bold">{{ br.title }}</div>
+                  <div class="text-caption text-medium-emphasis">{{ br.author }}</div>
+                  <div v-if="br.year" class="text-caption text-medium-emphasis">{{ br.year }}</div>
+                </div>
+                <v-icon color="primary" size="20">mdi-plus-circle</v-icon>
+              </div>
+            </v-card>
+          </div>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -262,7 +304,6 @@ let fileTarget = 'avatar'
 const iconDialog = ref(false)
 const iconSearch = ref('')
 const iconPickTarget = ref(-1)
-
 const allIcons = [
   'mdi-vuejs','mdi-react','mdi-angular','mdi-language-javascript','mdi-language-typescript',
   'mdi-language-python','mdi-language-java','mdi-language-csharp','mdi-language-cpp',
@@ -284,46 +325,63 @@ const allIcons = [
   'mdi-telescope','mdi-atom','mdi-flask','mdi-lightbulb','mdi-rocket',
   'mdi-tools','mdi-hammer','mdi-screwdriver','mdi-ab-testing',
 ]
-
 const filteredIcons = computed(() => {
   if (!iconSearch.value) return allIcons
   const q = iconSearch.value.toLowerCase()
-  return allIcons.filter(ic => ic.toLowerCase().includes(q))
+  return allIcons.filter(ic => ic.includes(q))
 })
+function openIconPicker(i) { iconPickTarget.value = i; iconSearch.value = ''; iconDialog.value = true }
+function selectIcon(ic) { if (iconPickTarget.value >= 0 && content.skills[iconPickTarget.value]) content.skills[iconPickTarget.value].icon = ic; iconDialog.value = false }
 
-function openIconPicker(skillIndex) {
-  iconPickTarget.value = skillIndex
-  iconSearch.value = ''
-  iconDialog.value = true
-}
+// Book search (Open Library API)
+const bookSearchDialog = ref(false)
+const bookQuery = ref('')
+const bookResults = ref([])
+const bookSearching = ref(false)
+const bookSearched = ref(false)
 
-function selectIcon(ic) {
-  if (iconPickTarget.value >= 0 && content.skills[iconPickTarget.value]) {
-    content.skills[iconPickTarget.value].icon = ic
+async function searchBooks() {
+  if (!bookQuery.value) return
+  bookSearching.value = true
+  bookSearched.value = false
+  bookResults.value = []
+  try {
+    const res = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(bookQuery.value)}&limit=12&fields=title,author_name,first_publish_year,cover_i,key`)
+    const data = await res.json()
+    bookResults.value = (data.docs || []).map(d => ({
+      title: d.title || '',
+      author: (d.author_name || []).join(', '),
+      year: d.first_publish_year || '',
+      cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : '',
+    }))
+  } catch (e) {
+    console.error('Book search failed', e)
   }
-  iconDialog.value = false
+  bookSearching.value = false
+  bookSearched.value = true
 }
 
+function addBookFromSearch(br) {
+  content.books.push({ title: br.title, author: br.author, cover: br.cover, notes: '' })
+  bookSearchDialog.value = false
+  snackbarText.value = `Added "${br.title}"`; snackbarColor.value = 'success'; snackbar.value = true
+}
+
+// Theme
 const themeColors = reactive({
   dark: { primary: vuetifyTheme.themes.value.dark.colors.primary, secondary: vuetifyTheme.themes.value.dark.colors.secondary, background: vuetifyTheme.themes.value.dark.colors.background, surface: vuetifyTheme.themes.value.dark.colors.surface },
   light: { primary: vuetifyTheme.themes.value.light.colors.primary, secondary: vuetifyTheme.themes.value.light.colors.secondary, background: vuetifyTheme.themes.value.light.colors.background, surface: vuetifyTheme.themes.value.light.colors.surface },
 })
-
 function updateColor(t, k, v) { themeColors[t][k] = v; vuetifyTheme.themes.value[t].colors[k] = v }
-function checkCode() { codeInput.value === ADMIN_CODE ? (authenticated.value = true, codeError.value = '') : (codeError.value = 'Invalid code') }
 
+function checkCode() { codeInput.value === ADMIN_CODE ? (authenticated.value = true, codeError.value = '') : (codeError.value = 'Invalid code') }
 function pickFile(type) { fileTarget = type; fileInput.value?.click() }
 function onFileChange(e) {
   const f = e.target.files?.[0]; if (!f) return
-  if (fileTarget === 'avatar') {
-    const r = new FileReader(); r.onload = ev => { content.about.avatar = ev.target.result }; r.readAsDataURL(f)
-  } else {
-    content.about.resumeUrl = URL.createObjectURL(f)
-    snackbarText.value = 'CV loaded (session only)'; snackbarColor.value = 'info'; snackbar.value = true
-  }
+  if (fileTarget === 'avatar') { const r = new FileReader(); r.onload = ev => { content.about.avatar = ev.target.result }; r.readAsDataURL(f) }
+  else { content.about.resumeUrl = URL.createObjectURL(f); snackbarText.value = 'CV loaded (session only)'; snackbarColor.value = 'info'; snackbar.value = true }
   e.target.value = ''
 }
-
 function handleSave() { saveContent(); localStorage.setItem('portfolio-theme', JSON.stringify(themeColors)); snackbarText.value = '✓ Saved'; snackbarColor.value = 'success'; snackbar.value = true }
 function handleReset() { resetContent(); localStorage.removeItem('portfolio-theme'); snackbarText.value = 'Reset'; snackbarColor.value = 'warning'; snackbar.value = true }
 </script>
@@ -333,5 +391,16 @@ function handleReset() { resetContent(); localStorage.removeItem('portfolio-them
 :deep(.v-field__field),
 :deep(.v-label) {
   color: rgb(var(--v-theme-on-surface)) !important;
+}
+.sticky-preview {
+  position: sticky;
+  top: 80px;
+}
+.book-result {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.book-result:hover {
+  background: rgba(125,211,252,0.06);
 }
 </style>
