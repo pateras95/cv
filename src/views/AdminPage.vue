@@ -1,5 +1,5 @@
 <template>
-  <v-container style="max-width: 1200px;" class="py-10">
+  <v-container style="max-width: 900px;" class="py-10">
     <div v-if="!authenticated" class="d-flex align-center justify-center" style="min-height: 60vh;">
       <v-card variant="outlined" rounded="xl" class="pa-8" style="max-width: 380px; width: 100%;">
         <div class="text-center mb-6">
@@ -13,20 +13,20 @@
     </div>
 
     <div v-if="authenticated">
-      <div class="d-flex align-center mb-6">
+      <div class="d-flex align-center justify-center mb-6">
         <h1 class="text-h5 font-weight-bold">Content Manager</h1>
         <v-chip size="x-small" variant="tonal" class="ml-3">v{{ appVersion }}</v-chip>
         <v-spacer />
         <v-btn variant="text" size="small" class="text-none" @click="authenticated = false"><v-icon start>mdi-logout</v-icon> Lock</v-btn>
       </div>
 
-      <div class="d-flex flex-wrap ga-2 mb-8">
+      <div class="d-flex flex-wrap ga-2 mb-8 justify-center">
         <v-btn v-for="t in tabs" :key="t" :variant="tab === t ? 'flat' : 'tonal'" :color="tab === t ? 'primary' : undefined" size="small" rounded="pill" class="text-none" @click="tab = t">{{ t }}</v-btn>
       </div>
 
       <!-- ABOUT -->
       <div v-show="tab === 'About'">
-        <v-row>
+        <v-row justify="center">
           <v-col cols="12" md="8">
             <v-text-field v-model="content.about.name" label="Full Name" variant="outlined" class="mb-2" />
             <v-text-field v-model="content.about.title" label="Job Title" variant="outlined" class="mb-2" />
@@ -58,8 +58,10 @@
 
       <!-- STATS -->
       <div v-show="tab === 'Stats'">
-        <v-btn color="primary" variant="tonal" size="small" class="text-none mb-4" @click="content.stats.push({ value: '0', label: 'New' })"><v-icon start>mdi-plus</v-icon> Add</v-btn>
-        <v-row>
+        <div class="text-center mb-4">
+          <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.stats.push({ value: '0', label: 'New' })"><v-icon start>mdi-plus</v-icon> Add</v-btn>
+        </div>
+        <v-row justify="center">
           <v-col v-for="(s, i) in content.stats" :key="'s'+i" cols="6" md="3">
             <v-card variant="outlined" rounded="lg" class="pa-4 text-center">
               <div class="text-h5 font-weight-black text-primary mb-1">{{ s.value }}</div>
@@ -74,20 +76,27 @@
 
       <!-- SKILLS -->
       <div v-show="tab === 'Skills'">
-        <v-btn color="primary" variant="tonal" size="small" class="text-none mb-2" @click="content.skills.push({name:'',icon:'mdi-code-tags',color:'#7dd3fc',category:'Other'})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
-        <p class="text-caption text-medium-emphasis mb-4">Drag to reorder · Icons: use mdi-* names from <a href="https://pictogrammers.com/library/mdi/" target="_blank" class="text-primary">Material Design Icons</a></p>
+        <div class="d-flex align-center justify-center ga-3 mb-4">
+          <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.skills.push({name:'',icon:'mdi-code-tags',color:'#7dd3fc',category:'Other'})"><v-icon start>mdi-plus</v-icon> Add Skill</v-btn>
+        </div>
+        <p class="text-caption text-medium-emphasis mb-4 text-center">Drag to reorder · Click the icon button to pick an icon</p>
         <draggable v-model="content.skills" item-key="name" handle=".drag-handle">
           <template #item="{ element, index }">
             <v-card variant="outlined" rounded="lg" class="pa-3 mb-2">
-              <div class="d-flex align-center ga-3">
-                <v-icon class="drag-handle" style="cursor:grab;">mdi-drag</v-icon>
-                <v-icon :color="element.color" size="24">{{ element.icon }}</v-icon>
-                <v-text-field v-model="element.name" label="Name" variant="outlined" density="compact" hide-details style="max-width:160px;" />
-                <v-text-field v-model="element.icon" label="Icon (mdi-*)" variant="outlined" density="compact" hide-details style="max-width:200px;" />
-                <input type="color" v-model="element.color" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;background:transparent;" />
-                <v-text-field v-model="element.category" label="Category" variant="outlined" density="compact" hide-details style="max-width:130px;" />
-                <v-btn icon="mdi-close" variant="text" size="x-small" color="error" @click="content.skills.splice(index,1)" />
-              </div>
+              <v-row dense align="center">
+                <v-col cols="auto"><v-icon class="drag-handle" style="cursor:grab;">mdi-drag</v-icon></v-col>
+                <v-col cols="auto">
+                  <v-btn variant="tonal" :color="element.color" size="small" rounded="lg" @click="openIconPicker(index)" class="text-none">
+                    <v-icon>{{ element.icon }}</v-icon>
+                  </v-btn>
+                </v-col>
+                <v-col><v-text-field v-model="element.name" label="Name" variant="outlined" density="compact" hide-details /></v-col>
+                <v-col cols="auto">
+                  <input type="color" v-model="element.color" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;background:transparent;" />
+                </v-col>
+                <v-col cols="3" sm="2"><v-text-field v-model="element.category" label="Category" variant="outlined" density="compact" hide-details /></v-col>
+                <v-col cols="auto"><v-btn icon="mdi-close" variant="text" size="x-small" color="error" @click="content.skills.splice(index,1)" /></v-col>
+              </v-row>
             </v-card>
           </template>
         </draggable>
@@ -95,8 +104,10 @@
 
       <!-- BOOKS -->
       <div v-show="tab === 'Books'">
-        <v-btn color="primary" variant="tonal" size="small" class="text-none mb-4" @click="content.books.push({title:'',author:'',cover:'',notes:''})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
-        <v-row>
+        <div class="text-center mb-4">
+          <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.books.push({title:'',author:'',cover:'',notes:''})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
+        </div>
+        <v-row justify="center">
           <v-col v-for="(b, i) in content.books" :key="'b'+i" cols="12" sm="6" md="4">
             <v-card variant="outlined" rounded="lg" class="pa-4">
               <div class="d-flex align-start mb-3">
@@ -115,8 +126,10 @@
 
       <!-- CERTS -->
       <div v-show="tab === 'Certs'">
-        <v-btn color="primary" variant="tonal" size="small" class="text-none mb-4" @click="content.certifications.push({title:'',issuer:'',date:'',url:''})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
-        <v-row>
+        <div class="text-center mb-4">
+          <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.certifications.push({title:'',issuer:'',date:'',url:''})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
+        </div>
+        <v-row justify="center">
           <v-col v-for="(c, i) in content.certifications" :key="'c'+i" cols="12" sm="6">
             <v-card variant="outlined" rounded="lg" class="pa-4">
               <div class="d-flex align-center mb-3">
@@ -138,8 +151,10 @@
 
       <!-- PROJECTS -->
       <div v-show="tab === 'Projects'">
-        <v-btn color="primary" variant="tonal" size="small" class="text-none mb-4" @click="content.projects.push({title:'',description:'',image:'',tags:[],link:'',github:'',category:'Personal'})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
-        <v-row>
+        <div class="text-center mb-4">
+          <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.projects.push({title:'',description:'',image:'',tags:[],link:'',github:'',category:'Personal'})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
+        </div>
+        <v-row justify="center">
           <v-col v-for="(p, i) in content.projects" :key="'p'+i" cols="12" sm="6" md="4">
             <v-card variant="outlined" rounded="lg" class="pa-4">
               <div class="d-flex align-center mb-3">
@@ -165,7 +180,7 @@
 
       <!-- CONTACT -->
       <div v-show="tab === 'Contact'">
-        <v-row><v-col cols="12" md="6">
+        <v-row justify="center"><v-col cols="12" md="8">
           <v-text-field v-model="content.contact.email" label="Email" variant="outlined" prepend-inner-icon="mdi-email-outline" class="mb-2" />
           <v-text-field v-model="content.contact.github" label="GitHub" variant="outlined" prepend-inner-icon="mdi-github" class="mb-2" />
           <v-text-field v-model="content.contact.linkedin" label="LinkedIn" variant="outlined" prepend-inner-icon="mdi-linkedin" class="mb-2" />
@@ -176,7 +191,7 @@
 
       <!-- THEME -->
       <div v-show="tab === 'Theme'">
-        <v-row>
+        <v-row justify="center">
           <v-col v-for="tn in ['dark','light']" :key="tn" cols="12" md="6">
             <h3 class="text-body-1 font-weight-bold mb-4 text-capitalize">{{ tn }} Theme</h3>
             <div v-for="(val, key) in themeColors[tn]" :key="key" class="d-flex align-center ga-3 mb-3">
@@ -188,19 +203,40 @@
       </div>
 
       <!-- Save -->
-      <v-card variant="flat" color="surface-variant" rounded="xl" class="pa-4 mt-8 d-flex align-center">
-        <v-btn variant="text" color="error" size="small" class="text-none" @click="handleReset">Reset All</v-btn>
-        <v-spacer />
+      <v-card variant="flat" color="surface-variant" rounded="xl" class="pa-4 mt-8 d-flex align-center justify-center">
+        <v-btn variant="text" color="error" size="small" class="text-none mr-4" @click="handleReset">Reset All</v-btn>
         <v-btn color="primary" variant="flat" rounded="lg" class="text-none px-8" @click="handleSave"><v-icon start>mdi-content-save</v-icon> Save</v-btn>
       </v-card>
     </div>
+
+    <!-- Icon Picker Dialog -->
+    <v-dialog v-model="iconDialog" max-width="600" scrollable>
+      <v-card rounded="xl">
+        <v-card-title class="d-flex align-center pa-4">
+          <span class="text-body-1 font-weight-bold">Pick an Icon</span>
+          <v-spacer />
+          <v-btn icon="mdi-close" variant="text" size="small" @click="iconDialog = false" />
+        </v-card-title>
+        <div class="px-4 pb-2">
+          <v-text-field v-model="iconSearch" label="Search icons..." variant="outlined" density="compact" hide-details prepend-inner-icon="mdi-magnify" clearable />
+        </div>
+        <v-card-text style="max-height: 400px;" class="pa-4">
+          <div class="d-flex flex-wrap ga-2 justify-center">
+            <v-btn v-for="ic in filteredIcons" :key="ic" :variant="iconPickTarget >= 0 && content.skills[iconPickTarget]?.icon === ic ? 'flat' : 'tonal'" :color="iconPickTarget >= 0 && content.skills[iconPickTarget]?.icon === ic ? 'primary' : undefined" icon size="42" rounded="lg" @click="selectIcon(ic)">
+              <v-icon size="22">{{ ic }}</v-icon>
+            </v-btn>
+          </div>
+          <div v-if="filteredIcons.length === 0" class="text-center text-medium-emphasis py-8">No icons match "{{ iconSearch }}"</div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="2000" location="bottom right">{{ snackbarText }}</v-snackbar>
   </v-container>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useContent } from '@/composables/useContent'
 import { useTheme } from 'vuetify'
 import draggable from 'vuedraggable'
@@ -221,6 +257,52 @@ const codeInput = ref('')
 const codeError = ref('')
 const fileInput = ref(null)
 let fileTarget = 'avatar'
+
+// Icon picker
+const iconDialog = ref(false)
+const iconSearch = ref('')
+const iconPickTarget = ref(-1)
+
+const allIcons = [
+  'mdi-vuejs','mdi-react','mdi-angular','mdi-language-javascript','mdi-language-typescript',
+  'mdi-language-python','mdi-language-java','mdi-language-csharp','mdi-language-cpp',
+  'mdi-language-go','mdi-language-rust','mdi-language-swift','mdi-language-kotlin',
+  'mdi-language-php','mdi-language-ruby','mdi-language-html5','mdi-language-css3',
+  'mdi-nodejs','mdi-docker','mdi-kubernetes','mdi-git','mdi-github','mdi-gitlab',
+  'mdi-aws','mdi-google-cloud','mdi-microsoft-azure','mdi-firebase',
+  'mdi-database','mdi-api','mdi-graphql','mdi-linux','mdi-apple','mdi-windows',
+  'mdi-tailwind','mdi-sass','mdi-webpack','mdi-npm','mdi-server','mdi-cloud',
+  'mdi-shield-check','mdi-test-tube','mdi-cellphone','mdi-monitor','mdi-web',
+  'mdi-robot','mdi-brain','mdi-chart-line','mdi-code-braces','mdi-code-tags',
+  'mdi-console','mdi-terminal','mdi-electron-framework','mdi-unity',
+  'mdi-gamepad-variant','mdi-cog','mdi-wrench','mdi-puzzle','mdi-flash',
+  'mdi-earth','mdi-sitemap','mdi-lan','mdi-layers','mdi-palette',
+  'mdi-camera','mdi-video','mdi-music','mdi-image','mdi-file-document',
+  'mdi-chart-bar','mdi-chart-pie','mdi-trending-up','mdi-wifi',
+  'mdi-bluetooth','mdi-nfc','mdi-chip','mdi-memory','mdi-cpu-64-bit',
+  'mdi-application-braces','mdi-application-cog','mdi-bug','mdi-math-compass',
+  'mdi-telescope','mdi-atom','mdi-flask','mdi-lightbulb','mdi-rocket',
+  'mdi-tools','mdi-hammer','mdi-screwdriver','mdi-ab-testing',
+]
+
+const filteredIcons = computed(() => {
+  if (!iconSearch.value) return allIcons
+  const q = iconSearch.value.toLowerCase()
+  return allIcons.filter(ic => ic.toLowerCase().includes(q))
+})
+
+function openIconPicker(skillIndex) {
+  iconPickTarget.value = skillIndex
+  iconSearch.value = ''
+  iconDialog.value = true
+}
+
+function selectIcon(ic) {
+  if (iconPickTarget.value >= 0 && content.skills[iconPickTarget.value]) {
+    content.skills[iconPickTarget.value].icon = ic
+  }
+  iconDialog.value = false
+}
 
 const themeColors = reactive({
   dark: { primary: vuetifyTheme.themes.value.dark.colors.primary, secondary: vuetifyTheme.themes.value.dark.colors.secondary, background: vuetifyTheme.themes.value.dark.colors.background, surface: vuetifyTheme.themes.value.dark.colors.surface },
