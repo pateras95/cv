@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Prevent recursive commits (the version bump commit would trigger this hook again)
+if git log -1 --pretty=%B | grep -q "^chore: bump version"; then
+  exit 0
+fi
+
+# Bump patch version in package.json
+npm version patch --no-git-tag-version
+
+# Amend the current commit with the version bump
+git add package.json package-lock.json 2>/dev/null
+git add package.json
+git commit --amend --no-edit --no-verify
+

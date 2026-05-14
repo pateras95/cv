@@ -1,14 +1,15 @@
 {
   "name": "portofolio",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.1.24",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "vite build && npx gh-pages -d dist",
-    "release": "standard-version && git push --follow-tags origin main"
+    "release": "standard-version && git push --follow-tags origin main",
+    "prepare": "husky"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.4",
+    "husky": "^9.1.7",
     "sass": "^1.99.0",
     "standard-version": "^9.5.0",
     "vite": "^5.4.10",

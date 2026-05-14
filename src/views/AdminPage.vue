@@ -1,6 +1,7 @@
 <template>
-  <v-container fluid class="py-10 px-4 px-md-10">
-    <div v-if="!authenticated" class="d-flex align-center " style="min-height: 60vh;">
+  <v-container style="max-width: 1400px;" class="py-10 mx-auto">
+    <!-- Login centered -->
+    <div v-if="!authenticated" class="d-flex align-center justify-center" style="min-height: 60vh;">
       <v-card variant="outlined" rounded="xl" class="pa-8" style="max-width: 380px; width: 100%;">
         <div class="text-center mb-6">
           <v-icon size="40" color="primary" class="mb-3">mdi-lock-outline</v-icon>
@@ -20,13 +21,13 @@
         <v-btn variant="text" size="small" class="text-none" @click="authenticated = false"><v-icon start>mdi-logout</v-icon> Lock</v-btn>
       </div>
 
-      <div class="d-flex flex-wrap ga-2 mb-8 ">
+      <div class="d-flex flex-wrap ga-2 mb-8">
         <v-btn v-for="t in tabs" :key="t" :variant="tab === t ? 'flat' : 'tonal'" :color="tab === t ? 'primary' : undefined" size="small" rounded="pill" class="text-none" @click="tab = t">{{ t }}</v-btn>
       </div>
 
       <!-- ABOUT -->
       <div v-show="tab === 'About'">
-        <v-row >
+        <v-row>
           <v-col cols="12" md="8">
             <v-text-field v-model="content.about.name" label="Full Name" variant="outlined" class="mb-2" />
             <v-text-field v-model="content.about.title" label="Job Title" variant="outlined" class="mb-2" />
@@ -58,10 +59,8 @@
 
       <!-- STATS -->
       <div v-show="tab === 'Stats'">
-        <div class="text-center mb-4">
-          <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.stats.push({ value: '0', label: 'New' })"><v-icon start>mdi-plus</v-icon> Add</v-btn>
-        </div>
-        <v-row >
+        <v-btn color="primary" variant="tonal" size="small" class="text-none mb-4" @click="content.stats.push({ value: '0', label: 'New' })"><v-icon start>mdi-plus</v-icon> Add</v-btn>
+        <v-row>
           <v-col v-for="(s, i) in content.stats" :key="'s'+i" cols="6" md="3">
             <v-card variant="outlined" rounded="lg" class="pa-4 text-center">
               <div class="text-h5 font-weight-black text-primary mb-1">{{ s.value }}</div>
@@ -74,65 +73,67 @@
         </v-row>
       </div>
 
-      <!-- SKILLS -->
+      <!-- SKILLS (grid of cards) -->
       <div v-show="tab === 'Skills'">
-        <div class="text-center mb-4">
+        <div class="d-flex align-center mb-4">
           <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.skills.push({name:'',icon:'mdi-code-tags',color:'#7dd3fc',category:'Other'})"><v-icon start>mdi-plus</v-icon> Add Skill</v-btn>
+          <v-spacer />
+          <span class="text-caption text-medium-emphasis">Drag to reorder · Click icon to change</span>
         </div>
-        <p class="text-caption text-medium-emphasis mb-4 text-center">Drag to reorder · Click icon to change</p>
-        <draggable v-model="content.skills" item-key="name" handle=".drag-handle">
+        <draggable v-model="content.skills" item-key="name" handle=".drag-handle" class="admin-grid">
           <template #item="{ element, index }">
-            <v-card variant="outlined" rounded="lg" class="pa-3 mb-2">
-              <v-row dense align="center">
-                <v-col cols="auto"><v-icon class="drag-handle" style="cursor:grab;">mdi-drag</v-icon></v-col>
-                <v-col cols="auto">
-                  <v-btn variant="tonal" :color="element.color" size="small" rounded="lg" @click="openIconPicker(index)"><v-icon>{{ element.icon }}</v-icon></v-btn>
-                </v-col>
-                <v-col><v-text-field v-model="element.name" label="Name" variant="outlined" density="compact" hide-details /></v-col>
-                <v-col cols="auto"><input type="color" v-model="element.color" style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;background:transparent;" /></v-col>
-                <v-col cols="3" sm="2"><v-text-field v-model="element.category" label="Category" variant="outlined" density="compact" hide-details /></v-col>
-                <v-col cols="auto"><v-btn icon="mdi-close" variant="text" size="x-small" color="error" @click="content.skills.splice(index,1)" /></v-col>
-              </v-row>
-            </v-card>
-          </template>
-        </draggable>
-      </div>
-
-      <!-- BOOKS -->
-      <div v-show="tab === 'Books'">
-        <div class="text-center mb-4">
-          <v-btn color="primary" variant="tonal" size="small" class="text-none mr-2" @click="content.books.push({title:'',author:'',cover:'',notes:''})"><v-icon start>mdi-plus</v-icon> Add Manually</v-btn>
-          <v-btn color="secondary" variant="tonal" size="small" class="text-none" @click="bookSearchDialog = true"><v-icon start>mdi-magnify</v-icon> Search Book</v-btn>
-        </div>
-        <p class="text-caption text-medium-emphasis mb-4 text-center">Drag to reorder</p>
-        <draggable v-model="content.books" item-key="title" handle=".drag-handle">
-          <template #item="{ element, index }">
-            <v-card variant="outlined" rounded="lg" class="pa-4 mb-3">
-              <div class="d-flex align-start ga-3">
-                <v-icon class="drag-handle mt-1" style="cursor:grab;">mdi-drag</v-icon>
-                <v-img v-if="element.cover" :src="element.cover" width="50" height="70" cover rounded class="flex-shrink-0" />
-                <div class="flex-grow-1">
-                  <v-row dense>
-                    <v-col cols="12" sm="6"><v-text-field v-model="element.title" label="Title" variant="outlined" density="compact" hide-details /></v-col>
-                    <v-col cols="12" sm="6"><v-text-field v-model="element.author" label="Author" variant="outlined" density="compact" hide-details /></v-col>
-                    <v-col cols="12"><v-text-field v-model="element.cover" label="Cover URL" variant="outlined" density="compact" hide-details /></v-col>
-                    <v-col cols="12"><v-text-field v-model="element.notes" label="Notes (shown on portfolio)" variant="outlined" density="compact" hide-details /></v-col>
-                  </v-row>
-                </div>
-                <v-btn icon="mdi-close" variant="text" size="x-small" color="error" class="mt-1" @click="content.books.splice(index,1)" />
+            <v-card variant="outlined" rounded="lg" class="pa-4">
+              <div class="d-flex align-center mb-3">
+                <v-icon class="drag-handle mr-2" style="cursor:grab;" size="18">mdi-drag</v-icon>
+                <v-btn variant="tonal" :color="element.color" size="small" rounded="lg" @click="openIconPicker(index)"><v-icon>{{ element.icon }}</v-icon></v-btn>
+                <span class="text-body-2 font-weight-bold ml-3">{{ element.name || 'New' }}</span>
+                <v-spacer />
+                <v-btn icon="mdi-close" variant="text" size="x-small" color="error" @click="content.skills.splice(index,1)" />
+              </div>
+              <v-text-field v-model="element.name" label="Name" variant="outlined" density="compact" hide-details class="mb-2" />
+              <div class="d-flex ga-2 align-center mb-2">
+                <v-text-field v-model="element.category" label="Category" variant="outlined" density="compact" hide-details style="flex:1;" />
+                <input type="color" v-model="element.color" style="width:36px;height:36px;border:none;border-radius:6px;cursor:pointer;background:transparent;" />
               </div>
             </v-card>
           </template>
         </draggable>
       </div>
 
-      <!-- CERTS -->
-      <div v-show="tab === 'Certs'">
-        <div class="text-center mb-4">
-          <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.certifications.push({title:'',issuer:'',date:'',url:''})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
+      <!-- BOOKS (grid of cards) -->
+      <div v-show="tab === 'Books'">
+        <div class="d-flex align-center mb-4">
+          <v-btn color="primary" variant="tonal" size="small" class="text-none mr-2" @click="content.books.push({title:'',author:'',cover:'',notes:''})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
+          <v-btn color="secondary" variant="tonal" size="small" class="text-none" @click="bookSearchDialog = true"><v-icon start>mdi-magnify</v-icon> Search Book</v-btn>
+          <v-spacer />
+          <span class="text-caption text-medium-emphasis">Drag to reorder</span>
         </div>
-        <v-row >
-          <v-col v-for="(c, i) in content.certifications" :key="'c'+i" cols="12" sm="6">
+        <draggable v-model="content.books" item-key="title" handle=".drag-handle" class="admin-grid">
+          <template #item="{ element, index }">
+            <v-card variant="outlined" rounded="lg" class="pa-4">
+              <div class="d-flex align-start mb-3">
+                <v-icon class="drag-handle mr-2 mt-1" style="cursor:grab;" size="18">mdi-drag</v-icon>
+                <v-img v-if="element.cover" :src="element.cover" width="40" height="58" cover rounded class="mr-3 flex-shrink-0" />
+                <div class="flex-grow-1">
+                  <div class="text-body-2 font-weight-bold">{{ element.title || 'New Book' }}</div>
+                  <div class="text-caption text-medium-emphasis">{{ element.author }}</div>
+                </div>
+                <v-btn icon="mdi-close" variant="text" size="x-small" color="error" @click="content.books.splice(index,1)" />
+              </div>
+              <v-text-field v-model="element.title" label="Title" variant="outlined" density="compact" hide-details class="mb-2" />
+              <v-text-field v-model="element.author" label="Author" variant="outlined" density="compact" hide-details class="mb-2" />
+              <v-text-field v-model="element.cover" label="Cover URL" variant="outlined" density="compact" hide-details class="mb-2" />
+              <v-text-field v-model="element.notes" label="Notes" variant="outlined" density="compact" hide-details />
+            </v-card>
+          </template>
+        </draggable>
+      </div>
+
+      <!-- CERTS (grid) -->
+      <div v-show="tab === 'Certs'">
+        <v-btn color="primary" variant="tonal" size="small" class="text-none mb-4" @click="content.certifications.push({title:'',issuer:'',date:'',url:''})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
+        <v-row>
+          <v-col v-for="(c, i) in content.certifications" :key="'c'+i" cols="12" sm="6" lg="4">
             <v-card variant="outlined" rounded="lg" class="pa-4">
               <div class="d-flex align-center mb-3">
                 <v-icon color="secondary" class="mr-2" size="20">mdi-medal</v-icon>
@@ -151,35 +152,32 @@
         </v-row>
       </div>
 
-      <!-- PROJECTS -->
+      <!-- PROJECTS (grid of cards) -->
       <div v-show="tab === 'Projects'">
-        <div class="text-center mb-4">
+        <div class="d-flex align-center mb-4">
           <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.projects.push({title:'',description:'',image:'',tags:[],link:'',github:'',category:'Personal'})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
+          <v-spacer />
+          <span class="text-caption text-medium-emphasis">Drag to reorder</span>
         </div>
-        <p class="text-caption text-medium-emphasis mb-4 text-center">Drag to reorder</p>
-        <draggable v-model="content.projects" item-key="title" handle=".drag-handle">
+        <draggable v-model="content.projects" item-key="title" handle=".drag-handle" class="admin-grid admin-grid--wide">
           <template #item="{ element, index }">
-            <v-card variant="outlined" rounded="lg" class="pa-4 mb-3">
-              <div class="d-flex align-start ga-3">
-                <v-icon class="drag-handle mt-1" style="cursor:grab;">mdi-drag</v-icon>
-                <div class="flex-grow-1">
-                  <div class="d-flex align-center mb-3">
-                    <v-chip :color="element.category==='Work'?'primary':'secondary'" size="x-small" variant="flat" class="mr-2">{{ element.category || 'Personal' }}</v-chip>
-                    <span class="text-body-2 font-weight-bold">{{ element.title || 'New Project' }}</span>
-                    <v-spacer />
-                    <v-btn icon="mdi-close" variant="text" size="x-small" color="error" @click="content.projects.splice(index,1)" />
-                  </div>
-                  <v-row dense>
-                    <v-col cols="12" sm="6"><v-text-field v-model="element.title" label="Title" variant="outlined" density="compact" hide-details /></v-col>
-                    <v-col cols="12" sm="6"><v-text-field v-model="element.category" label="Category (Work/Personal)" variant="outlined" density="compact" hide-details /></v-col>
-                    <v-col cols="12"><v-textarea v-model="element.description" label="Description" variant="outlined" density="compact" rows="2" hide-details /></v-col>
-                    <v-col cols="12"><v-text-field v-model="element.image" label="Screenshot URL" variant="outlined" density="compact" hide-details /></v-col>
-                    <v-col cols="6"><v-text-field v-model="element.link" label="Live URL" variant="outlined" density="compact" hide-details /></v-col>
-                    <v-col cols="6"><v-text-field v-model="element.github" label="GitHub URL" variant="outlined" density="compact" hide-details /></v-col>
-                    <v-col cols="12"><v-combobox v-model="element.tags" label="Tags" variant="outlined" density="compact" hide-details multiple chips closable-chips /></v-col>
-                  </v-row>
-                </div>
+            <v-card variant="outlined" rounded="lg" class="pa-4">
+              <div class="d-flex align-center mb-3">
+                <v-icon class="drag-handle mr-2" style="cursor:grab;" size="18">mdi-drag</v-icon>
+                <v-chip :color="element.category==='Work'?'primary':'secondary'" size="x-small" variant="flat" class="mr-2">{{ element.category || 'Personal' }}</v-chip>
+                <span class="text-body-2 font-weight-bold text-truncate">{{ element.title || 'New Project' }}</span>
+                <v-spacer />
+                <v-btn icon="mdi-close" variant="text" size="x-small" color="error" @click="content.projects.splice(index,1)" />
               </div>
+              <v-text-field v-model="element.title" label="Title" variant="outlined" density="compact" hide-details class="mb-2" />
+              <v-text-field v-model="element.category" label="Category (Work/Personal)" variant="outlined" density="compact" hide-details class="mb-2" />
+              <v-textarea v-model="element.description" label="Description" variant="outlined" density="compact" rows="2" hide-details class="mb-2" />
+              <v-text-field v-model="element.image" label="Screenshot URL" variant="outlined" density="compact" hide-details class="mb-2" />
+              <v-row dense>
+                <v-col cols="6"><v-text-field v-model="element.link" label="Live URL" variant="outlined" density="compact" hide-details /></v-col>
+                <v-col cols="6"><v-text-field v-model="element.github" label="GitHub" variant="outlined" density="compact" hide-details /></v-col>
+              </v-row>
+              <v-combobox v-model="element.tags" label="Tags" variant="outlined" density="compact" hide-details multiple chips closable-chips class="mt-2" />
             </v-card>
           </template>
         </draggable>
@@ -187,18 +185,20 @@
 
       <!-- CONTACT -->
       <div v-show="tab === 'Contact'">
-        <v-row><v-col cols="12" md="6" lg="4">
-          <v-text-field v-model="content.contact.email" label="Email" variant="outlined" prepend-inner-icon="mdi-email-outline" class="mb-2" />
-          <v-text-field v-model="content.contact.github" label="GitHub" variant="outlined" prepend-inner-icon="mdi-github" class="mb-2" />
-          <v-text-field v-model="content.contact.linkedin" label="LinkedIn" variant="outlined" prepend-inner-icon="mdi-linkedin" class="mb-2" />
-          <v-text-field v-model="content.contact.twitter" label="Twitter" variant="outlined" prepend-inner-icon="mdi-twitter" class="mb-2" />
-          <v-text-field v-model="content.contact.location" label="Location" variant="outlined" prepend-inner-icon="mdi-map-marker-outline" />
-        </v-col></v-row>
+        <v-row>
+          <v-col cols="12" md="6" lg="4">
+            <v-text-field v-model="content.contact.email" label="Email" variant="outlined" prepend-inner-icon="mdi-email-outline" class="mb-2" />
+            <v-text-field v-model="content.contact.github" label="GitHub" variant="outlined" prepend-inner-icon="mdi-github" class="mb-2" />
+            <v-text-field v-model="content.contact.linkedin" label="LinkedIn" variant="outlined" prepend-inner-icon="mdi-linkedin" class="mb-2" />
+            <v-text-field v-model="content.contact.twitter" label="Twitter" variant="outlined" prepend-inner-icon="mdi-twitter" class="mb-2" />
+            <v-text-field v-model="content.contact.location" label="Location" variant="outlined" prepend-inner-icon="mdi-map-marker-outline" />
+          </v-col>
+        </v-row>
       </div>
 
       <!-- THEME -->
       <div v-show="tab === 'Theme'">
-        <v-row >
+        <v-row>
           <v-col v-for="tn in ['dark','light']" :key="tn" cols="12" md="6">
             <h3 class="text-body-1 font-weight-bold mb-4 text-capitalize">{{ tn }} Theme</h3>
             <div v-for="(val, key) in themeColors[tn]" :key="key" class="d-flex align-center ga-3 mb-3">
@@ -210,8 +210,9 @@
       </div>
 
       <!-- Save -->
-      <v-card variant="flat" color="surface-variant" rounded="xl" class="pa-4 mt-8 d-flex align-center ">
-        <v-btn variant="text" color="error" size="small" class="text-none mr-4" @click="handleReset">Reset All</v-btn>
+      <v-card variant="flat" color="surface-variant" rounded="xl" class="pa-4 mt-8 d-flex align-center">
+        <v-btn variant="text" color="error" size="small" class="text-none" @click="handleReset">Reset All</v-btn>
+        <v-spacer />
         <v-btn color="primary" variant="flat" rounded="lg" class="text-none px-8" @click="handleSave"><v-icon start>mdi-content-save</v-icon> Save</v-btn>
       </v-card>
     </div>
@@ -228,7 +229,7 @@
           <v-text-field v-model="iconSearch" label="Search icons..." variant="outlined" density="compact" hide-details prepend-inner-icon="mdi-magnify" clearable />
         </div>
         <v-card-text style="max-height: 400px;" class="pa-4">
-          <div class="d-flex flex-wrap ga-2 ">
+          <div class="d-flex flex-wrap ga-2 justify-center">
             <v-btn v-for="ic in filteredIcons" :key="ic" :variant="iconPickTarget >= 0 && content.skills[iconPickTarget]?.icon === ic ? 'flat' : 'tonal'" :color="iconPickTarget >= 0 && content.skills[iconPickTarget]?.icon === ic ? 'primary' : undefined" icon size="42" rounded="lg" @click="selectIcon(ic)">
               <v-icon size="22">{{ ic }}</v-icon>
             </v-btn>
@@ -392,19 +393,20 @@ function handleReset() { resetContent(); localStorage.removeItem('portfolio-them
 :deep(.v-label) {
   color: rgb(var(--v-theme-on-surface)) !important;
 }
-.sticky-preview {
-  position: sticky;
-  top: 80px;
-}
-.book-result {
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.book-result:hover {
-  background: rgba(125,211,252,0.06);
-}
+.sticky-preview { position: sticky; top: 80px; }
+.book-result { cursor: pointer; transition: background 0.2s; }
+.book-result:hover { background: rgba(125,211,252,0.06); }
+
 /* Override global mobile centering for admin */
-.v-container {
-  text-align: left !important;
+.v-container { text-align: left !important; }
+
+/* Card grid layout: 3 per row on desktop, 2 on tablet, 1 on mobile */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.admin-grid--wide {
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
 }
 </style>
