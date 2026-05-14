@@ -39,13 +39,9 @@
       <h2 class="text-h5 font-weight-bold mb-8">Reading List</h2>
       <div class="books-grid">
         <div v-for="book in content.books" :key="book.title" class="book-item">
-          <v-tooltip :text="book.notes" location="top" max-width="250">
-            <template #activator="{ props }">
-              <div class="book-3d" v-bind="props">
-                <v-img :src="book.cover" cover class="book-cover-img" />
-              </div>
-            </template>
-          </v-tooltip>
+          <div class="book-3d">
+            <v-img :src="book.cover" cover class="book-cover-img" />
+          </div>
           <div class="mt-3">
             <div class="text-body-2 font-weight-bold" style="line-height: 1.3;">{{ book.title }}</div>
             <div class="text-caption text-medium-emphasis">{{ book.author }}</div>

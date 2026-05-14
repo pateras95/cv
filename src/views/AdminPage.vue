@@ -210,11 +210,17 @@
       </div>
 
       <!-- Save -->
-      <v-card variant="flat" color="surface-variant" rounded="xl" class="pa-4 mt-8 d-flex align-center">
+      <v-card variant="flat" color="surface-variant" rounded="xl" class="pa-4 mt-8 d-flex align-center flex-wrap ga-2">
         <v-btn variant="text" color="error" size="small" class="text-none" @click="handleReset">Reset All</v-btn>
+        <v-btn variant="tonal" color="info" size="small" class="text-none" @click="exportContent"><v-icon start>mdi-download</v-icon> Export JSON</v-btn>
+        <v-btn variant="tonal" color="warning" size="small" class="text-none" @click="importInput?.click()"><v-icon start>mdi-upload</v-icon> Import JSON</v-btn>
+        <input ref="importInput" type="file" accept=".json" hidden @change="importContent" />
         <v-spacer />
         <v-btn color="primary" variant="flat" rounded="lg" class="text-none px-8" @click="handleSave"><v-icon start>mdi-content-save</v-icon> Save</v-btn>
       </v-card>
+      <v-alert type="info" variant="tonal" rounded="lg" class="mt-4" density="compact">
+        <strong>How to publish changes:</strong> Click Export JSON → replace <code>src/data/defaults.json</code> with the downloaded file → commit & run <code>npm run deploy</code>.
+      </v-alert>
     </div>
 
     <!-- Icon Picker Dialog -->
@@ -299,6 +305,7 @@ const authenticated = ref(false)
 const codeInput = ref('')
 const codeError = ref('')
 const fileInput = ref(null)
+const importInput = ref(null)
 let fileTarget = 'avatar'
 
 // Icon picker
@@ -385,6 +392,36 @@ function onFileChange(e) {
 }
 function handleSave() { saveContent(); localStorage.setItem('portfolio-theme', JSON.stringify(themeColors)); snackbarText.value = '✓ Saved'; snackbarColor.value = 'success'; snackbar.value = true }
 function handleReset() { resetContent(); localStorage.removeItem('portfolio-theme'); snackbarText.value = 'Reset'; snackbarColor.value = 'warning'; snackbar.value = true }
+
+function exportContent() {
+  const data = JSON.stringify(content, null, 2)
+  const blob = new Blob([data], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'defaults.json'
+  a.click()
+  URL.revokeObjectURL(url)
+  snackbarText.value = 'Exported! Replace src/data/defaults.json with this file.'; snackbarColor.value = 'info'; snackbar.value = true
+}
+
+function importContent(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    try {
+      const imported = JSON.parse(ev.target.result)
+      Object.assign(content, imported)
+      saveContent()
+      snackbarText.value = '✓ Imported & saved'; snackbarColor.value = 'success'; snackbar.value = true
+    } catch (err) {
+      snackbarText.value = 'Invalid JSON file'; snackbarColor.value = 'error'; snackbar.value = true
+    }
+  }
+  reader.readAsText(file)
+  e.target.value = ''
+}
 </script>
 
 <style scoped>
