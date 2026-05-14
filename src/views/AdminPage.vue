@@ -1,6 +1,6 @@
 <template>
-  <v-container style="max-width: 900px;" class="py-10">
-    <div v-if="!authenticated" class="d-flex align-center justify-center" style="min-height: 60vh;">
+  <v-container fluid class="py-10 px-4 px-md-10">
+    <div v-if="!authenticated" class="d-flex align-center " style="min-height: 60vh;">
       <v-card variant="outlined" rounded="xl" class="pa-8" style="max-width: 380px; width: 100%;">
         <div class="text-center mb-6">
           <v-icon size="40" color="primary" class="mb-3">mdi-lock-outline</v-icon>
@@ -13,20 +13,20 @@
     </div>
 
     <div v-if="authenticated">
-      <div class="d-flex align-center justify-center mb-6">
+      <div class="d-flex align-center mb-6">
         <h1 class="text-h5 font-weight-bold">Content Manager</h1>
         <v-chip size="x-small" variant="tonal" class="ml-3">v{{ appVersion }}</v-chip>
         <v-spacer />
         <v-btn variant="text" size="small" class="text-none" @click="authenticated = false"><v-icon start>mdi-logout</v-icon> Lock</v-btn>
       </div>
 
-      <div class="d-flex flex-wrap ga-2 mb-8 justify-center">
+      <div class="d-flex flex-wrap ga-2 mb-8 ">
         <v-btn v-for="t in tabs" :key="t" :variant="tab === t ? 'flat' : 'tonal'" :color="tab === t ? 'primary' : undefined" size="small" rounded="pill" class="text-none" @click="tab = t">{{ t }}</v-btn>
       </div>
 
       <!-- ABOUT -->
       <div v-show="tab === 'About'">
-        <v-row justify="center">
+        <v-row >
           <v-col cols="12" md="8">
             <v-text-field v-model="content.about.name" label="Full Name" variant="outlined" class="mb-2" />
             <v-text-field v-model="content.about.title" label="Job Title" variant="outlined" class="mb-2" />
@@ -61,7 +61,7 @@
         <div class="text-center mb-4">
           <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.stats.push({ value: '0', label: 'New' })"><v-icon start>mdi-plus</v-icon> Add</v-btn>
         </div>
-        <v-row justify="center">
+        <v-row >
           <v-col v-for="(s, i) in content.stats" :key="'s'+i" cols="6" md="3">
             <v-card variant="outlined" rounded="lg" class="pa-4 text-center">
               <div class="text-h5 font-weight-black text-primary mb-1">{{ s.value }}</div>
@@ -131,7 +131,7 @@
         <div class="text-center mb-4">
           <v-btn color="primary" variant="tonal" size="small" class="text-none" @click="content.certifications.push({title:'',issuer:'',date:'',url:''})"><v-icon start>mdi-plus</v-icon> Add</v-btn>
         </div>
-        <v-row justify="center">
+        <v-row >
           <v-col v-for="(c, i) in content.certifications" :key="'c'+i" cols="12" sm="6">
             <v-card variant="outlined" rounded="lg" class="pa-4">
               <div class="d-flex align-center mb-3">
@@ -187,7 +187,7 @@
 
       <!-- CONTACT -->
       <div v-show="tab === 'Contact'">
-        <v-row justify="center"><v-col cols="12" md="8">
+        <v-row><v-col cols="12" md="6" lg="4">
           <v-text-field v-model="content.contact.email" label="Email" variant="outlined" prepend-inner-icon="mdi-email-outline" class="mb-2" />
           <v-text-field v-model="content.contact.github" label="GitHub" variant="outlined" prepend-inner-icon="mdi-github" class="mb-2" />
           <v-text-field v-model="content.contact.linkedin" label="LinkedIn" variant="outlined" prepend-inner-icon="mdi-linkedin" class="mb-2" />
@@ -198,7 +198,7 @@
 
       <!-- THEME -->
       <div v-show="tab === 'Theme'">
-        <v-row justify="center">
+        <v-row >
           <v-col v-for="tn in ['dark','light']" :key="tn" cols="12" md="6">
             <h3 class="text-body-1 font-weight-bold mb-4 text-capitalize">{{ tn }} Theme</h3>
             <div v-for="(val, key) in themeColors[tn]" :key="key" class="d-flex align-center ga-3 mb-3">
@@ -210,7 +210,7 @@
       </div>
 
       <!-- Save -->
-      <v-card variant="flat" color="surface-variant" rounded="xl" class="pa-4 mt-8 d-flex align-center justify-center">
+      <v-card variant="flat" color="surface-variant" rounded="xl" class="pa-4 mt-8 d-flex align-center ">
         <v-btn variant="text" color="error" size="small" class="text-none mr-4" @click="handleReset">Reset All</v-btn>
         <v-btn color="primary" variant="flat" rounded="lg" class="text-none px-8" @click="handleSave"><v-icon start>mdi-content-save</v-icon> Save</v-btn>
       </v-card>
@@ -228,7 +228,7 @@
           <v-text-field v-model="iconSearch" label="Search icons..." variant="outlined" density="compact" hide-details prepend-inner-icon="mdi-magnify" clearable />
         </div>
         <v-card-text style="max-height: 400px;" class="pa-4">
-          <div class="d-flex flex-wrap ga-2 justify-center">
+          <div class="d-flex flex-wrap ga-2 ">
             <v-btn v-for="ic in filteredIcons" :key="ic" :variant="iconPickTarget >= 0 && content.skills[iconPickTarget]?.icon === ic ? 'flat' : 'tonal'" :color="iconPickTarget >= 0 && content.skills[iconPickTarget]?.icon === ic ? 'primary' : undefined" icon size="42" rounded="lg" @click="selectIcon(ic)">
               <v-icon size="22">{{ ic }}</v-icon>
             </v-btn>
@@ -402,5 +402,9 @@ function handleReset() { resetContent(); localStorage.removeItem('portfolio-them
 }
 .book-result:hover {
   background: rgba(125,211,252,0.06);
+}
+/* Override global mobile centering for admin */
+.v-container {
+  text-align: left !important;
 }
 </style>
